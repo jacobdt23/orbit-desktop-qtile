@@ -96,38 +96,42 @@ windowcontrols button.close,
 windowcontrols button.maximize,
 windowcontrols button.minimize {
     background-image: none;
-    background-color: rgba(248, 248, 242, 0.08);
-    color: #f8f8f2;
     border-radius: 9999px;
-    min-width: 24px;
-    min-height: 24px;
+    min-width: 16px;
+    min-height: 16px;
     padding: 0;
-    margin: 0 3px;
+    margin: 0 4px;
     box-shadow: none;
     border: none;
+    color: transparent;
 }
 
-windowcontrols button.close:hover,
-windowcontrols button.maximize:hover,
+windowcontrols button.minimize { background-color: #ffb86c; }
+windowcontrols button.maximize { background-color: #50fa7b; }
+windowcontrols button.close    { background-color: #ff5555; }
+
 windowcontrols button.minimize:hover,
-windowcontrols button.close:active,
-windowcontrols button.maximize:active,
 windowcontrols button.minimize:active {
-    background-image: none;
-    background-color: rgba(189, 147, 249, 0.28);
-    color: #f8f8f2;
+    background-color: #ffb86c;
+    color: #21222c;
+}
+
+windowcontrols button.maximize:hover,
+windowcontrols button.maximize:active {
+    background-color: #50fa7b;
+    color: #21222c;
 }
 
 windowcontrols button.close:hover,
 windowcontrols button.close:active {
     background-color: #ff5555;
-    color: #ffffff;
+    color: #21222c;
 }
 
 windowcontrols button.close:backdrop,
 windowcontrols button.maximize:backdrop,
 windowcontrols button.minimize:backdrop {
     background-image: none;
-    background-color: rgba(248, 248, 242, 0.04);
-    color: rgba(248, 248, 242, 0.5);
+    background-color: #6272a4;
+    color: transparent;
 }
