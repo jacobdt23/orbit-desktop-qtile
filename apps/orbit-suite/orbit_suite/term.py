@@ -120,8 +120,9 @@ class VteTerminalTab(Gtk.ScrolledWindow):
             None,
         )
 
-    def focus_terminal(self) -> None:
+    def focus_terminal(self) -> bool:
         self.term.grab_focus()
+        return False
 
     def set_font_size(self, size: int) -> None:
         desc = Pango.FontDescription.from_string(f"Monospace {size}")
@@ -168,6 +169,8 @@ class PtyTerminalTab(Gtk.ScrolledWindow):
         self.text_view = Gtk.TextView.new_with_buffer(self.buffer)
         self.text_view.set_editable(False)
         self.text_view.set_cursor_visible(True)
+        self.text_view.set_can_focus(True)
+        self.text_view.set_focusable(True)
         self.text_view.set_monospace(True)
         self.text_view.set_wrap_mode(Gtk.WrapMode.CHAR)
         self.text_view.set_left_margin(10)
@@ -177,14 +180,20 @@ class PtyTerminalTab(Gtk.ScrolledWindow):
         self.text_view.add_css_class("orbit-term-view")
 
         key_ctrl = Gtk.EventControllerKey()
+        key_ctrl.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         key_ctrl.connect("key-pressed", self._on_key_pressed)
         self.text_view.add_controller(key_ctrl)
+
+        click_ctrl = Gtk.GestureClick()
+        click_ctrl.connect("pressed", lambda *_: self.text_view.grab_focus())
+        self.text_view.add_controller(click_ctrl)
 
         self.set_child(self.text_view)
         self._spawn_shell()
 
-    def focus_terminal(self) -> None:
+    def focus_terminal(self) -> bool:
         self.text_view.grab_focus()
+        return False
 
     def set_font_size(self, _size: int) -> None:
         # Handled via window-level CSS provider for the fallback TextView
@@ -502,6 +511,10 @@ class OrbitTermWindow(Adw.ApplicationWindow):
 
         self._tab_view = Adw.TabView()
         self._tab_view.connect("close-page", self._on_close_page)
+        self._tab_view.connect(
+            "notify::selected-page",
+            lambda *_: self.active_tab and GLib.idle_add(self.active_tab.focus_terminal),
+        )
 
         self._tab_bar = Adw.TabBar()
         self._tab_bar.set_view(self._tab_view)
@@ -543,7 +556,7 @@ class OrbitTermWindow(Adw.ApplicationWindow):
         tab.connect("exited", lambda _t, p=page: self._tab_view.close_page(p))
         tab.connect("title-changed", lambda _t, title, p=page: p.set_title(title))
         self._tab_view.set_selected_page(page)
-        tab.focus_terminal()
+        GLib.idle_add(tab.focus_terminal)
         return tab
 
     def _on_close_page(self, _tv: Adw.TabView, page: Adw.TabPage) -> bool:
