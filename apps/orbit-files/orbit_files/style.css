@@ -92,46 +92,61 @@
     border-top: 1px solid #44475a;
 }
 
-windowcontrols button.close,
-windowcontrols button.maximize,
-windowcontrols button.minimize {
+headerbar windowcontrols > button.close,
+headerbar windowcontrols > button.maximize,
+headerbar windowcontrols > button.minimize,
+windowcontrols > button.close,
+windowcontrols > button.maximize,
+windowcontrols > button.minimize {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 0 3px;
+    margin: 0;
+    min-width: 22px;
+    min-height: 22px;
+}
+
+headerbar windowcontrols > button.close > image,
+headerbar windowcontrols > button.maximize > image,
+headerbar windowcontrols > button.minimize > image,
+windowcontrols > button.close > image,
+windowcontrols > button.maximize > image,
+windowcontrols > button.minimize > image {
     background-image: none;
     border-radius: 9999px;
     min-width: 16px;
     min-height: 16px;
     padding: 0;
-    margin: 0 4px;
-    box-shadow: none;
-    border: none;
     color: transparent;
+    -gtk-icon-size: 12px;
 }
 
-windowcontrols button.minimize { background-color: #ffb86c; }
-windowcontrols button.maximize { background-color: #50fa7b; }
-windowcontrols button.close    { background-color: #ff5555; }
+headerbar windowcontrols > button.minimize > image,
+windowcontrols > button.minimize > image { background-color: #ffb86c; }
 
-windowcontrols button.minimize:hover,
-windowcontrols button.minimize:active {
-    background-color: #ffb86c;
-    color: #21222c;
-}
+headerbar windowcontrols > button.maximize > image,
+windowcontrols > button.maximize > image { background-color: #50fa7b; }
 
-windowcontrols button.maximize:hover,
-windowcontrols button.maximize:active {
-    background-color: #50fa7b;
-    color: #21222c;
-}
+headerbar windowcontrols > button.close > image,
+windowcontrols > button.close > image { background-color: #ff5555; }
 
-windowcontrols button.close:hover,
-windowcontrols button.close:active {
-    background-color: #ff5555;
-    color: #21222c;
-}
+headerbar windowcontrols > button.minimize:hover > image,
+windowcontrols > button.minimize:hover > image { background-color: #ffb86c; color: #21222c; }
 
-windowcontrols button.close:backdrop,
-windowcontrols button.maximize:backdrop,
-windowcontrols button.minimize:backdrop {
-    background-image: none;
+headerbar windowcontrols > button.maximize:hover > image,
+windowcontrols > button.maximize:hover > image { background-color: #50fa7b; color: #21222c; }
+
+headerbar windowcontrols > button.close:hover > image,
+windowcontrols > button.close:hover > image { background-color: #ff5555; color: #21222c; }
+
+headerbar windowcontrols > button.close:backdrop > image,
+headerbar windowcontrols > button.maximize:backdrop > image,
+headerbar windowcontrols > button.minimize:backdrop > image,
+windowcontrols > button.close:backdrop > image,
+windowcontrols > button.maximize:backdrop > image,
+windowcontrols > button.minimize:backdrop > image {
     background-color: #6272a4;
     color: transparent;
 }
