@@ -8,7 +8,7 @@ import threading
 from pathlib import Path
 from typing import Callable
 
-from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk, Pango
+from gi.repository import Adw, Gdk, GdkPixbuf, Gio, GLib, GObject, Gtk, Pango
 
 from orbit_files import file_ops
 from orbit_files.models import FileItem, enumerate_directory
@@ -66,6 +66,7 @@ class FilePane(Gtk.Box):
         self._refresh_timeout_id: int | None = None
         self._active_popover: Gtk.PopoverMenu | None = None
         self._is_active = False
+        self._thumb_cache: dict[tuple[str, int], Gdk.Texture] = {}
 
         # Track focus/clicks anywhere inside the pane to mark it as active
         click_tracker = Gtk.GestureClick()
@@ -551,9 +552,49 @@ class FilePane(Gtk.Box):
         item = list_item.get_item()
         if not isinstance(item, FileItem) or box is None:
             return
-        box._orbit_icon.set_from_gicon(item.gicon)  # type: ignore[attr-defined]
+        icon: Gtk.Image = box._orbit_icon  # type: ignore[attr-defined]
         box._orbit_label.set_text(item.name)  # type: ignore[attr-defined]
         box.set_opacity(0.6 if item.is_hidden else 1.0)
+
+        if item.is_image and item.path and item.size <= 15 * 1024 * 1024:
+            key = (item.path, item.mtime)
+            cached = self._thumb_cache.get(key)
+            if cached is not None:
+                icon.set_from_paintable(cached)
+                return
+            icon.set_from_gicon(item.gicon)
+            self._load_grid_thumb_async(list_item, item, key)
+        else:
+            icon.set_from_gicon(item.gicon)
+
+    def _load_grid_thumb_async(
+        self, list_item: Gtk.ListItem, item: FileItem, key: tuple[str, int]
+    ) -> None:
+        def _worker() -> None:
+            try:
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(key[0], 64, 64, True)
+                tex = Gdk.Texture.new_for_pixbuf(pb)
+                GLib.idle_add(self._apply_grid_thumb, list_item, item, key, tex)
+            except Exception:
+                pass
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _apply_grid_thumb(
+        self,
+        list_item: Gtk.ListItem,
+        item: FileItem,
+        key: tuple[str, int],
+        tex: Gdk.Texture,
+    ) -> bool:
+        if len(self._thumb_cache) > 300:
+            self._thumb_cache.clear()
+        self._thumb_cache[key] = tex
+        if list_item.get_item() is item:
+            box = list_item.get_child()
+            if box is not None and hasattr(box, "_orbit_icon"):
+                box._orbit_icon.set_from_paintable(tex)
+        return False
 
     # ------------------------------------------------------------------
     # Item activation, Drag & Drop, Context Menus

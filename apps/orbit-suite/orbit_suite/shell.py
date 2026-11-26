@@ -82,6 +82,9 @@ window.orbit-dock-window {
 .orbit-mem { color: #bb9af7; }
 .orbit-disk { color: #e0af68; }
 .orbit-vol { color: #9ece6a; }
+.orbit-net { color: #7dcfff; }
+.orbit-bat { color: #9ece6a; }
+.orbit-bat-low { color: #f7768e; }
 
 .orbit-ws-btn {
     background-color: rgba(26, 27, 38, 0.72);
@@ -156,12 +159,19 @@ window.orbit-dock-window {
 }
 """
 
+def _bin(name: str) -> str:
+    local = Path.home() / ".local" / "bin" / name
+    if local.exists():
+        return str(local)
+    return shutil.which(name) or name
+
+
 PINNED_APPS = [
-    ("Orbit Launch", "launch", "/home/jacob/.local/bin/orbit-launch"),
-    ("Orbit Term", "utilities-terminal", "/home/jacob/.local/bin/orbit-term"),
-    ("Orbit Files", "system-file-manager", "/home/jacob/.local/bin/orbit-files"),
-    ("Orbit Edit (LazyVim)", "nvim", "/home/jacob/.local/bin/orbit-nvim"),
-    ("Orbit View", "image-x-generic", "/home/jacob/.local/bin/orbit-view"),
+    ("Orbit Launch", "launch", _bin("orbit-launch")),
+    ("Orbit Term", "utilities-terminal", _bin("orbit-term")),
+    ("Orbit Files", "system-file-manager", _bin("orbit-files")),
+    ("Orbit Edit (LazyVim)", "nvim", _bin("orbit-nvim")),
+    ("Orbit View", "image-x-generic", _bin("orbit-view")),
     ("Brave Browser", "brave-browser", "brave"),
 ]
 
@@ -267,6 +277,37 @@ class SystemStats:
         except Exception:
             return "—"
 
+    def network_summary(self) -> str:
+        try:
+            net_dir = Path("/sys/class/net")
+            for iface in sorted(net_dir.iterdir()):
+                name = iface.name
+                if name == "lo":
+                    continue
+                state = (iface / "operstate").read_text().strip()
+                if state == "up":
+                    if (iface / "wireless").is_dir() or name.startswith("wl"):
+                        return "Wi-Fi"
+                    return "Eth"
+            return "Offline"
+        except Exception:
+            return "—"
+
+    def battery_summary(self) -> tuple[str | None, bool]:
+        """Return (label, is_low) or (None, False) on desktop machines without a battery."""
+        try:
+            ps_dir = Path("/sys/class/power_supply")
+            bats = sorted(p for p in ps_dir.iterdir() if p.name.startswith("BAT"))
+            if not bats:
+                return None, False
+            bat = bats[0]
+            cap = int((bat / "capacity").read_text().strip())
+            status = (bat / "status").read_text().strip()
+            prefix = "CHG" if status == "Charging" else "BAT"
+            return f"{prefix} {cap}%", (cap <= 20 and status != "Charging")
+        except Exception:
+            return None, False
+
 
 class TopBarWindow(Gtk.ApplicationWindow):
     """Floating frosted-glass top bar for a single monitor."""
@@ -301,7 +342,7 @@ class TopBarWindow(Gtk.ApplicationWindow):
         brand_icon = Gtk.Image.new_from_icon_name("distributor-logo-archlinux")
         brand_icon.set_pixel_size(18)
         brand_btn.set_child(brand_icon)
-        brand_btn.connect("clicked", lambda *_: _spawn("/home/jacob/.local/bin/orbit-launch"))
+        brand_btn.connect("clicked", lambda *_: _spawn(_bin("orbit-launch")))
         left.append(brand_btn)
 
         self._ws_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
@@ -349,18 +390,44 @@ class TopBarWindow(Gtk.ApplicationWindow):
         self._disk_btn = Gtk.Button.new_with_label("Disk —")
         self._disk_btn.add_css_class("orbit-pill")
         self._disk_btn.add_css_class("orbit-disk")
-        self._disk_btn.connect("clicked", lambda *_: _spawn("/home/jacob/.local/bin/orbit-files /"))
+        self._disk_btn.connect("clicked", lambda *_: _spawn(f"{_bin('orbit-files')} /"))
         right.append(self._disk_btn)
+
+        self._net_btn = Gtk.Button.new_with_label("Net —")
+        self._net_btn.add_css_class("orbit-pill")
+        self._net_btn.add_css_class("orbit-net")
+        self._net_btn.set_tooltip_text("Network Settings")
+        self._net_btn.connect("clicked", lambda *_: _spawn("nm-connection-editor"))
+        right.append(self._net_btn)
+
+        self._bat_btn = Gtk.Button.new_with_label("")
+        self._bat_btn.add_css_class("orbit-pill")
+        self._bat_btn.add_css_class("orbit-bat")
+        self._bat_btn.set_visible(False)
+        right.append(self._bat_btn)
 
         self._vol_btn = Gtk.Button.new_with_label("Vol —")
         self._vol_btn.add_css_class("orbit-pill")
         self._vol_btn.add_css_class("orbit-vol")
-        self._vol_btn.set_tooltip_text("Click: Mute / Right-click: Audio Mixer")
+        self._vol_btn.set_tooltip_text("Scroll: Volume  •  Click: Mute  •  Right-click: Mixer")
         self._vol_btn.connect("clicked", lambda *_: _spawn("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
         rc = Gtk.GestureClick()
         rc.set_button(3)
         rc.connect("pressed", lambda *_: _spawn("pavucontrol"))
         self._vol_btn.add_controller(rc)
+        scroll = Gtk.EventControllerScroll.new(Gtk.EventControllerScrollFlags.VERTICAL)
+        scroll.connect(
+            "scroll",
+            lambda _c, _dx, dy: (
+                _spawn(
+                    "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
+                    if dy < 0
+                    else "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+                ),
+                True,
+            )[1],
+        )
+        self._vol_btn.add_controller(scroll)
         right.append(self._vol_btn)
 
         power_btn = Gtk.MenuButton()
@@ -394,11 +461,23 @@ class TopBarWindow(Gtk.ApplicationWindow):
     def update_clock(self, text: str) -> None:
         self._clock_btn.set_label(text)
 
-    def update_stats(self, cpu: int, mem: str, disk: str, vol: str) -> None:
+    def update_stats(
+        self, cpu: int, mem: str, disk: str, vol: str, net: str, bat: str | None, bat_low: bool
+    ) -> None:
         self._cpu_btn.set_label(f"CPU {cpu}%")
         self._mem_btn.set_label(f"RAM {mem}")
         self._disk_btn.set_label(f"Disk {disk}")
+        self._net_btn.set_label(net)
         self._vol_btn.set_label(f"Vol {vol}")
+        if bat is not None:
+            self._bat_btn.set_label(bat)
+            self._bat_btn.set_visible(True)
+            if bat_low:
+                self._bat_btn.add_css_class("orbit-bat-low")
+            else:
+                self._bat_btn.remove_css_class("orbit-bat-low")
+        else:
+            self._bat_btn.set_visible(False)
 
     def update_hypr(self, active_ws: int, occupied: set[int], title: str) -> None:
         for ws, btn in self._ws_buttons.items():
@@ -442,7 +521,7 @@ class BottomDockWindow(Gtk.ApplicationWindow):
         search_btn = Gtk.Button.new_with_label("Search apps…")
         search_btn.add_css_class("orbit-pill")
         search_btn.set_tooltip_text("Orbit Launch (Super+D)")
-        search_btn.connect("clicked", lambda *_: _spawn("/home/jacob/.local/bin/orbit-launch"))
+        search_btn.connect("clicked", lambda *_: _spawn(_bin("orbit-launch")))
         left.append(search_btn)
         bar.set_start_widget(left)
 
@@ -538,9 +617,22 @@ class OrbitShellApp(Adw.Application):
         if display is None:
             return
 
-        monitors = display.get_monitors()
-        for i in range(monitors.get_n_items()):
-            mon = monitors.get_item(i)
+        self._monitors = display.get_monitors()
+        self._monitors.connect("items-changed", lambda *_: self._rebuild_monitor_windows())
+        self._rebuild_monitor_windows()
+
+        GLib.timeout_add_seconds(1, self._tick_clock)
+        GLib.timeout_add_seconds(2, self._tick_stats)
+        self._start_hypr_socket_listener()
+
+    def _rebuild_monitor_windows(self) -> None:
+        for w in self._bars + self._docks:
+            w.close()
+        self._bars.clear()
+        self._docks.clear()
+
+        for i in range(self._monitors.get_n_items()):
+            mon = self._monitors.get_item(i)
             if isinstance(mon, Gdk.Monitor):
                 bar = TopBarWindow(self, mon)
                 bar.present()
@@ -554,10 +646,6 @@ class OrbitShellApp(Adw.Application):
         self._tick_stats()
         self._refresh_hypr()
 
-        GLib.timeout_add_seconds(1, self._tick_clock)
-        GLib.timeout_add_seconds(2, self._tick_stats)
-        self._start_hypr_socket_listener()
-
     def _tick_clock(self) -> bool:
         now = datetime.datetime.now().strftime("%a, %b %d  •  %I:%M %p")
         for bar in self._bars:
@@ -569,8 +657,10 @@ class OrbitShellApp(Adw.Application):
         mem = self._stats.mem_summary()
         disk = self._stats.disk_summary()
         vol = self._stats.volume_summary()
+        net = self._stats.network_summary()
+        bat, bat_low = self._stats.battery_summary()
         for bar in self._bars:
-            bar.update_stats(cpu, mem, disk, vol)
+            bar.update_stats(cpu, mem, disk, vol, net, bat, bat_low)
         return True
 
     def _schedule_hypr_refresh(self) -> None:

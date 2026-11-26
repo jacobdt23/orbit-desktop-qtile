@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orbit-suite"
-version = "0.1.0"
+version = "1.0.0"
 description = "Custom GTK 4 + Libadwaita desktop app suite in Python (Edit, View, Launch, Term)"
 readme = "README.md"
 requires-python = ">=3.10"

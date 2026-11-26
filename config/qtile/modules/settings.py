@@ -3,6 +3,11 @@
 import os
 
 # Wayland / toolkit environment defaults applied before Qtile subsystems load
+def _bin(name: str) -> str:
+    local = os.path.expanduser(f"~/.local/bin/{name}")
+    return local if os.path.exists(local) else name
+
+
 ENV_VARS = {
     "__GLX_VENDOR_LIBRARY_NAME": "nvidia",
     "ELECTRON_OZONE_PLATFORM_HINT": "auto",
@@ -11,7 +16,7 @@ ENV_VARS = {
     "GDK_BACKEND": "wayland,x11,*",
     "XDG_CURRENT_DESKTOP": "X-Orbit-Qtile:Qtile",
     "XDG_SESSION_DESKTOP": "X-Orbit-Qtile",
-    "EDITOR": "/home/jacob/.local/bin/orbit-nvim-cli",
+    "EDITOR": _bin("orbit-nvim-cli"),
 }
 
 
@@ -22,12 +27,12 @@ def apply_environment() -> None:
 
 # Modifier & core applications (Orbit Suite + LazyVim)
 MOD = "mod4"  # Super / Windows key
-TERMINAL = "/home/jacob/.local/bin/orbit-term"
-FILE_MANAGER = "/home/jacob/.local/bin/orbit-files"
-EDITOR = "/home/jacob/.local/bin/orbit-nvim"
-VIEWER = "/home/jacob/.local/bin/orbit-view"
+TERMINAL = _bin("orbit-term")
+FILE_MANAGER = _bin("orbit-files")
+EDITOR = _bin("orbit-nvim")
+VIEWER = _bin("orbit-view")
 BROWSER = "brave"
-LAUNCHER = "/home/jacob/.local/bin/orbit-launch"
+LAUNCHER = _bin("orbit-launch")
 WELCOME_APP = "hyprfrost-welcome"
 SYSTEM_MONITOR = "kitty -e btop"
 AUDIO_MIXER = "pavucontrol"
