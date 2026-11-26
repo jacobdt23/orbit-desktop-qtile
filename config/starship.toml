@@ -1,67 +1,67 @@
-# Orbit Desktop — Tokyo Night Starship Prompt
+# Orbit Desktop — Dracula Starship Prompt
 add_newline = true
 command_timeout = 800
 
 format = """
-[](#7aa2f7)\
+[](#bd93f9)\
 $os\
-[](bg:#bb9af7 fg:#7aa2f7)\
+[](bg:#ff79c6 fg:#bd93f9)\
 $directory\
-[](fg:#bb9af7 bg:#24283b)\
+[](fg:#ff79c6 bg:#44475a)\
 $git_branch\
 $git_status\
-[](fg:#24283b bg:#1f2335)\
+[](fg:#44475a bg:#21222c)\
 $python\
 $rust\
 $nodejs\
 $cmd_duration\
-[](fg:#1f2335)
+[](fg:#21222c)
 $character"""
 
 [os]
 disabled = false
-style = "bg:#7aa2f7 fg:#14161f bold"
+style = "bg:#bd93f9 fg:#21222c bold"
 
 [os.symbols]
 Arch = " 󰣇 "
 Linux = "  "
 
 [directory]
-style = "bg:#bb9af7 fg:#14161f bold"
+style = "bg:#ff79c6 fg:#21222c bold"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
 
 [git_branch]
 symbol = ""
-style = "bg:#24283b fg:#7dcfff bold"
+style = "bg:#44475a fg:#8be9fd bold"
 format = "[ $symbol $branch ]($style)"
 
 [git_status]
-style = "bg:#24283b fg:#e0af68"
+style = "bg:#44475a fg:#f1fa8c"
 format = "[$all_status$ahead_behind]($style)"
 
 [python]
 symbol = ""
-style = "bg:#1f2335 fg:#9ece6a"
+style = "bg:#21222c fg:#50fa7b"
 format = "[ $symbol ($version) ]($style)"
 
 [rust]
 symbol = ""
-style = "bg:#1f2335 fg:#ff9e64"
+style = "bg:#21222c fg:#ffb86c"
 format = "[ $symbol ($version) ]($style)"
 
 [nodejs]
 symbol = ""
-style = "bg:#1f2335 fg:#9ece6a"
+style = "bg:#21222c fg:#50fa7b"
 format = "[ $symbol ($version) ]($style)"
 
 [cmd_duration]
 min_time = 1500
-style = "bg:#1f2335 fg:#e0af68"
+style = "bg:#21222c fg:#ffb86c"
 format = "[ 󱐋 $duration ]($style)"
 
 [character]
-success_symbol = "[❯](bold #7aa2f7)"
-error_symbol = "[❯](bold #f7768e)"
-vimcmd_symbol = "[❮](bold #9ece6a)"
+success_symbol = "[❯](bold #bd93f9)"
+error_symbol = "[❯](bold #ff5555)"
+vimcmd_symbol = "[❮](bold #50fa7b)"

@@ -37,95 +37,95 @@ window.orbit-dock-window {
 }
 
 .orbit-top-bar {
-    background-color: rgba(20, 22, 34, 0.80);
-    border: 1px solid rgba(122, 162, 247, 0.30);
+    background-color: rgba(33, 34, 44, 0.86);
+    border: 1px solid rgba(189, 147, 249, 0.35);
     border-radius: 10px;
     padding: 2px 6px;
 }
 
 .orbit-bottom-dock {
-    background-color: rgba(20, 22, 34, 0.82);
-    border: 1px solid rgba(122, 162, 247, 0.32);
+    background-color: rgba(33, 34, 44, 0.86);
+    border: 1px solid rgba(189, 147, 249, 0.35);
     border-radius: 10px;
     padding: 2px 8px;
 }
 
 .orbit-pill {
-    background-color: rgba(26, 27, 38, 0.78);
-    border: 1px solid rgba(41, 46, 66, 0.85);
+    background-color: rgba(40, 42, 54, 0.88);
+    border: 1px solid rgba(68, 71, 90, 0.9);
     border-radius: 7px;
     padding: 1px 8px;
     min-height: 20px;
-    color: #c0caf5;
+    color: #f8f8f2;
     font-size: 10px;
     font-weight: 600;
 }
 
 .orbit-pill:hover {
-    background-color: rgba(36, 40, 59, 0.95);
-    border-color: rgba(122, 162, 247, 0.65);
+    background-color: rgba(68, 71, 90, 0.95);
+    border-color: rgba(189, 147, 249, 0.75);
 }
 
 .orbit-clock-pill {
-    border-color: rgba(122, 162, 247, 0.38);
-    color: #7dcfff;
+    border-color: rgba(189, 147, 249, 0.45);
+    color: #8be9fd;
     font-weight: 700;
 }
 
 .orbit-window-title {
-    color: #7dcfff;
+    color: #8be9fd;
     font-size: 11px;
     font-weight: 500;
 }
 
-.orbit-cpu { color: #7aa2f7; }
-.orbit-mem { color: #bb9af7; }
-.orbit-disk { color: #e0af68; }
-.orbit-vol { color: #9ece6a; }
-.orbit-net { color: #7dcfff; }
-.orbit-bat { color: #9ece6a; }
-.orbit-bat-low { color: #f7768e; }
+.orbit-cpu { color: #bd93f9; }
+.orbit-mem { color: #ff79c6; }
+.orbit-disk { color: #ffb86c; }
+.orbit-vol { color: #50fa7b; }
+.orbit-net { color: #8be9fd; }
+.orbit-bat { color: #50fa7b; }
+.orbit-bat-low { color: #ff5555; }
 
 .orbit-ws-btn {
-    background-color: rgba(26, 27, 38, 0.72);
-    border: 1px solid rgba(41, 46, 66, 0.85);
+    background-color: rgba(40, 42, 54, 0.85);
+    border: 1px solid rgba(68, 71, 90, 0.9);
     border-radius: 6px;
     padding: 1px 6px;
     min-width: 20px;
     min-height: 20px;
-    color: #565f89;
+    color: #6272a4;
     font-size: 10px;
     font-weight: 700;
 }
 
 .orbit-ws-btn.occupied {
-    color: #c0caf5;
-    border-color: rgba(122, 162, 247, 0.35);
+    color: #f8f8f2;
+    border-color: rgba(189, 147, 249, 0.4);
 }
 
 .orbit-ws-btn.active {
-    background: linear-gradient(135deg, #7aa2f7 0%, #bb9af7 100%);
-    border-color: #7aa2f7;
-    color: #14161f;
+    background: linear-gradient(135deg, #bd93f9 0%, #ff79c6 100%);
+    border-color: #bd93f9;
+    color: #21222c;
     font-weight: 900;
 }
 
 .orbit-ws-btn:hover {
-    border-color: #7aa2f7;
+    border-color: #bd93f9;
 }
 
 .orbit-power-btn {
-    background-color: rgba(20, 22, 31, 0.9);
-    border: 1px solid rgba(247, 118, 142, 0.75);
+    background-color: rgba(33, 34, 44, 0.92);
+    border: 1px solid rgba(255, 85, 85, 0.75);
     border-radius: 7px;
     padding: 1px 6px;
     min-height: 20px;
-    color: #f7768e;
+    color: #ff5555;
 }
 
 .orbit-power-btn:hover {
-    background-color: #f7768e;
-    color: #14161f;
+    background-color: #ff5555;
+    color: #21222c;
 }
 
 .orbit-dock-btn {
@@ -139,21 +139,21 @@ window.orbit-dock-window {
 }
 
 .orbit-dock-btn:hover {
-    background-color: rgba(122, 162, 247, 0.20);
-    border-color: rgba(122, 162, 247, 0.55);
+    background-color: rgba(189, 147, 249, 0.22);
+    border-color: rgba(189, 147, 249, 0.6);
 }
 
 .orbit-dock-btn.running {
-    border-bottom: 2px solid rgba(122, 162, 247, 0.55);
+    border-bottom: 2px solid rgba(189, 147, 249, 0.6);
 }
 
 .orbit-dock-btn.focused {
-    background-color: rgba(122, 162, 247, 0.16);
-    border-bottom: 2px solid #7aa2f7;
+    background-color: rgba(189, 147, 249, 0.18);
+    border-bottom: 2px solid #ff79c6;
 }
 
 .orbit-dock-sep {
-    background-color: rgba(122, 162, 247, 0.25);
+    background-color: rgba(189, 147, 249, 0.3);
     min-width: 1px;
     margin: 6px 4px;
 }

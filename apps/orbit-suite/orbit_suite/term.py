@@ -38,8 +38,8 @@ APP_NAME = "Orbit Term"
 
 TERM_CSS = """
 .orbit-term-view {
-    background-color: #13161d;
-    color: #e6eaf2;
+    background-color: #282a36;
+    color: #f8f8f2;
     font-family: monospace;
 }
 """
@@ -60,10 +60,10 @@ _SGR_COLORS = {
 }
 
 _PALETTE_HEX = [
-    "#15161e", "#f7768e", "#9ece6a", "#e0af68",
-    "#7aa2f7", "#bb9af7", "#7dcfff", "#a9b1d6",
-    "#414868", "#ff7a93", "#b9f27c", "#ff9e64",
-    "#7da6ff", "#c099ff", "#0db9d7", "#c0caf5",
+    "#21222c", "#ff5555", "#50fa7b", "#f1fa8c",
+    "#bd93f9", "#ff79c6", "#8be9fd", "#f8f8f2",
+    "#6272a4", "#ff6e6e", "#69ff94", "#ffffa5",
+    "#d6acff", "#ff92df", "#a4ffff", "#ffffff",
 ]
 
 
@@ -92,8 +92,8 @@ class VteTerminalTab(Gtk.ScrolledWindow):
         self.term.set_scroll_on_keystroke(True)
         self.term.set_bold_is_bright(True)
         self.term.set_colors(
-            _rgba("#c0caf5"),
-            _rgba("#13161d"),
+            _rgba("#f8f8f2"),
+            _rgba("#282a36"),
             [_rgba(h) for h in _PALETTE_HEX],
         )
         self.set_font_size(font_size)
@@ -125,7 +125,7 @@ class VteTerminalTab(Gtk.ScrolledWindow):
         return False
 
     def set_font_size(self, size: int) -> None:
-        desc = Pango.FontDescription.from_string(f"Monospace {size}")
+        desc = Pango.FontDescription.from_string(f"JetBrainsMono Nerd Font {size}")
         self.term.set_font(desc)
 
     def copy_selection(self) -> None:
@@ -523,6 +523,25 @@ class OrbitTermWindow(Adw.ApplicationWindow):
 
         toolbar_view.set_content(self._tab_view)
         self.connect("close-request", self._on_window_close)
+
+        # Window-level CAPTURE key handler for PTY fallback so typing works regardless of widget focus
+        if not HAS_VTE:
+            win_key = Gtk.EventControllerKey()
+            win_key.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+            win_key.connect("key-pressed", self._on_window_key_pressed)
+            self.add_controller(win_key)
+
+    def _on_window_key_pressed(
+        self,
+        ctrl: Gtk.EventControllerKey,
+        keyval: int,
+        keycode: int,
+        state: Gdk.ModifierType,
+    ) -> bool:
+        tab = self.active_tab
+        if isinstance(tab, PtyTerminalTab):
+            return tab._on_key_pressed(ctrl, keyval, keycode, state)
+        return False
 
     def _setup_actions(self) -> None:
         actions = [
