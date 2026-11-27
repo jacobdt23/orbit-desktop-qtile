@@ -91,10 +91,29 @@ class VteTerminalTab(Gtk.ScrolledWindow):
         self.term.set_scroll_on_output(False)
         self.term.set_scroll_on_keystroke(True)
         self.term.set_bold_is_bright(True)
+        bg_hex, fg_hex = "#282a36", "#f8f8f2"
+        pal_hex = list(_PALETTE_HEX)
+        pal_file = Path.home() / ".config" / "orbit" / "palette.json"
+        if pal_file.is_file():
+            try:
+                import json
+
+                pal = json.loads(pal_file.read_text(encoding="utf-8"))
+                bg_hex = pal.get("bg", bg_hex)
+                fg_hex = pal.get("fg", fg_hex)
+                if pal.get("accent"):
+                    pal_hex[4] = pal["accent"]
+                if pal.get("accent2"):
+                    pal_hex[5] = pal["accent2"]
+                if pal.get("cyan"):
+                    pal_hex[6] = pal["cyan"]
+            except Exception:
+                pass
+
         self.term.set_colors(
-            _rgba("#f8f8f2"),
-            _rgba("#282a36"),
-            [_rgba(h) for h in _PALETTE_HEX],
+            _rgba(fg_hex),
+            _rgba(bg_hex),
+            [_rgba(h) for h in pal_hex],
         )
         self.set_font_size(font_size)
 

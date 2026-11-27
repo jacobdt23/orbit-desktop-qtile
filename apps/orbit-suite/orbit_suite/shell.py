@@ -600,8 +600,10 @@ class OrbitShellApp(Adw.Application):
 
     def do_startup(self) -> None:
         Adw.Application.do_startup(self)
+        dynamic_path = Path.home() / ".config" / "orbit" / "theme.css"
+        dynamic_css = dynamic_path.read_text(encoding="utf-8") if dynamic_path.is_file() else ""
         provider = Gtk.CssProvider()
-        provider.load_from_string(SHELL_CSS)
+        provider.load_from_string(SHELL_CSS + "\n" + dynamic_css)
         display = Gdk.Display.get_default()
         if display is not None:
             Gtk.StyleContext.add_provider_for_display(

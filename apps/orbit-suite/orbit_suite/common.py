@@ -9,6 +9,8 @@ gi.require_version("Gdk", "4.0")
 gi.require_version("Adw", "1")
 gi.require_version("GdkPixbuf", "2.0")
 
+from pathlib import Path
+
 from gi.repository import Gdk, Gtk
 
 DRACULA_BASE_CSS = """
@@ -93,9 +95,11 @@ windowcontrols > button.minimize:backdrop > image {
 
 
 def load_css_string(css: str) -> None:
-    """Register Dracula GTK4/Libadwaita CSS and window-control styling on the default display."""
+    """Register Dracula GTK4/Libadwaita CSS plus any active dynamic Orbit wallpaper palette."""
+    dynamic_path = Path.home() / ".config" / "orbit" / "theme.css"
+    dynamic_css = dynamic_path.read_text(encoding="utf-8") if dynamic_path.is_file() else ""
     provider = Gtk.CssProvider()
-    provider.load_from_string(DRACULA_BASE_CSS + "\n" + css)
+    provider.load_from_string(DRACULA_BASE_CSS + "\n" + css + "\n" + dynamic_css)
     display = Gdk.Display.get_default()
     if display is not None:
         Gtk.StyleContext.add_provider_for_display(
