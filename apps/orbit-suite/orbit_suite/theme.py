@@ -290,11 +290,12 @@ def apply_live(palette: dict[str, str]) -> None:
         hp_conf = Path.home() / ".config" / "hypr-standalone" / "hyprpaper.conf"
         if hp_conf.parent.exists():
             hp_conf.write_text(
-                f"preload = {wall}\nwallpaper = ,{wall}\nsplash = false\n",
+                f"wallpaper {{\n    monitor =\n    path = {wall}\n    fit_mode = cover\n}}\nsplash = false\n",
                 encoding="utf-8",
             )
             subprocess.Popen(
-                f"pkill -x hyprpaper; sleep 0.1; setsid hyprpaper -c '{hp_conf}' >/dev/null 2>&1 &",
+                f"pkill -x owe-render; pkill -x owed; pkill -x hyprpaper; sleep 0.15; "
+                f"setsid hyprpaper -c '{hp_conf}' >/dev/null 2>&1 &",
                 shell=True,
                 start_new_session=True,
             )
